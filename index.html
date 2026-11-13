@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>電子名片 | Digital Business Card</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: linear-gradient(135deg, #eef2f6 0%, #dce7f2 100%);
+      --card-bg: #ffffff;
+      --header-bg: linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #0f4c5c 100%);
+      --header-text: #ffffff;
+      --accent: #0f766e;
+      --accent-hover: #115e59;
+      --accent-soft: #f0fdfa;
+      --accent-border: #99f6e4;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --pill-bg: #f8fafc;
+      --shadow-card: 0 20px 45px -12px rgba(15, 23, 42, 0.18);
+    }
+
+    [data-theme="teal"] {
+      --bg-page: linear-gradient(135deg, #f0f9ff 0%, #ccfbf1 100%);
+      --header-bg: linear-gradient(135deg, #042f2e 0%, #0f766e 60%, #0284c7 100%);
+      --accent: #0d9488;
+      --accent-hover: #0f766e;
+      --accent-soft: #f0fdfa;
+      --accent-border: #99f6e4;
+    }
+
+    [data-theme="ivory"] {
+      --bg-page: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --header-bg: linear-gradient(135deg, #334155 0%, #475569 100%);
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --accent-border: #bfdbfe;
+    }
+
+    [data-theme="obsidian"] {
+      --bg-page: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      --header-bg: linear-gradient(135deg, #09090b 0%, #18181b 65%, #422006 100%);
+      --accent: #b45309;
+      --accent-hover: #92400e;
+      --accent-soft: #fffbeb;
+      --accent-border: #fde68a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 20px 16px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+
+    /* Top Control Bar */
+    .control-bar {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ctrl-btn {
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.18s ease;
+    }
+
+    .ctrl-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .ctrl-btn.primary-toggle {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .ctrl-btn.primary-toggle.active {
+      background: #eab308;
+      color: #422006;
+      border-color: #eab308;
+    }
+
+    .ctrl-select {
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Main Business Card */
+    .vcard-wrapper {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    /* Card Banner Header */
+    .card-hero {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 32px 28px 28px;
+      position: relative;
+      text-align: center;
+    }
+
+    .card-hero::after {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .avatar-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 3px solid rgba(255, 255, 255, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .avatar-ring img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-name-zh {
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      line-height: 1.25;
+    }
+
+    .hero-name-en {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.88);
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-title {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .hero-org {
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    /* Card Body */
+    .card-body {
+      padding: 24px 26px 28px;
+    }
+
+    /* Primary CTA Buttons */
+    .cta-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .btn-save-vcf {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 16px -4px rgba(15, 118, 110, 0.45);
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .btn-save-vcf:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-save-vcf:active {
+      transform: translateY(0);
+    }
+
+    .btn-icon-action {
+      background: var(--pill-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+
+    .btn-icon-action:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    /* QR Code Drawer */
+    .qr-panel {
+      display: none;
+      background: var(--pill-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .qr-panel.open {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .qr-tabs {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 3px;
+      border-radius: 9px;
+      margin-bottom: 14px;
+    }
+
+    .qr-tab {
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    .qr-tab.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    #qrCanvasWrap {
+      background: #ffffff;
+      display: inline-block;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 8px;
+    }
+
+    .qr-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Bio & Tags */
+    .bio-box {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      line-height: 1.55;
+    }
+
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .tag-chip {
+      background: #ffffff;
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* Contact Items List */
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--pill-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all 0.18s ease;
+    }
+
+    a.contact-item:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: translateX(2px);
+    }
+
+    .c-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .c-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .c-meta {
+      min-width: 0;
+    }
+
+    .c-label {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .c-val {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+
+    .c-arrow {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .empty-contact-tip {
+      text-align: center;
+      padding: 18px;
+      border: 1px dashed var(--border-color);
+      border-radius: 14px;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+    }
+
+    /* Edit Form Section */
+    .edit-panel {
+      display: none;
+      padding: 22px 26px 28px;
+      border-top: 1px solid var(--border-color);
+      background: #f8fafc;
+    }
+
+    body.is-editing .edit-panel {
+      display: block;
+    }
+
+    body.is-editing .view-panel {
+      display: none;
+    }
+
+    .form-section-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 16px 0 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section-title:first-child {
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .cta-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 8px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      background: #ffffff;
+      color: var(--text-main);
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+
+    .avatar-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 520px;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .control-bar, .cta-row, .footer-note {
+        display: none !important;
+      }
+      .vcard-wrapper {
+        box-shadow: none;
+        border: 1px solid #cbd5e1;
+      }
+      .card-hero {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body data-theme="navy">
+
+  <!-- Control Toolbar -->
+  <div class="control-bar">
+    <div class="ctrl-group">
+      <button class="ctrl-btn primary-toggle" id="btnEditToggle" onclick="toggleEditMode()">
+        ✏️ <span id="editBtnLabel">編輯名片</span>
+      </button>
+      <select class="ctrl-select" id="langSelect" onchange="changeLang(this.value)" title="顯示語言">
+        <option value="bilingual">中英雙語</option>
+        <option value="zh">繁體中文</option>
+        <option value="en">English</option>
+      </select>
+      <select class="ctrl-select" id="themeSelect" onchange="changeTheme(this.value)" title="名片配色">
+        <option value="navy">深海藍</option>
+        <option value="teal">醫療青</option>
+        <option value="ivory">極簡白</option>
+        <option value="obsidian">曜石黑</option>
+      </select>
+    </div>
+    <div class="ctrl-group">
+      <button class="ctrl-btn" onclick="exportBackupJSON()" title="匯出備份檔">💾 備份</button>
+      <button class="ctrl-btn" onclick="document.getElementById('importJsonInput').click()" title="匯入還原">📂 還原</button>
+      <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importBackupJSON(event)" />
+    </div>
+  </div>
+
+  <!-- Main Digital Business Card -->
+  <main class="vcard-wrapper">
+    <!-- Card Hero -->
+    <div class="card-hero">
+      <div class="avatar-ring" id="avatarContainer">黃</div>
+      <div class="hero-name-zh" id="dispNameZh">黃敬棋</div>
+      <div class="hero-name-en" id="dispNameEn">Jing-Qi Huang</div>
+      <div class="hero-title" id="dispTitle">實習醫學生 · Medical Intern</div>
+      <div class="hero-org" id="dispOrg"></div>
+    </div>
+
+    <!-- View Mode Body -->
+    <div class="card-body view-panel">
+      <!-- Action Buttons -->
+      <div class="cta-row">
+        <button class="btn-save-vcf" onclick="downloadVCF()">
+          📥 <span id="lblSaveVcf">儲存聯絡人 (.vcf)</span>
+        </button>
+        <button class="btn-icon-action" onclick="toggleQRPanel()" id="btnQrToggle">
+          📱 <span id="lblQrBtn">QR Code</span>
+        </button>
+        <button class="btn-icon-action" onclick="copyCardText()">
+          📋 <span id="lblCopyBtn">複製</span>
+        </button>
+      </div>
+
+      <!-- Expandable QR Code Panel -->
+      <div class="qr-panel" id="qrPanel">
+        <div class="qr-tabs">
+          <button class="qr-tab active" id="tabQrVcf" onclick="setQrMode('vcf')">存聯絡人條碼 (vCard)</button>
+          <button class="qr-tab" id="tabQrUrl" onclick="setQrMode('url')">名片網址條碼 (URL)</button>
+        </div>
+        <div>
+          <div id="qrCanvasWrap"></div>
+        </div>
+        <div class="qr-hint" id="qrHintText">使用手機相機掃描，即可直接將聯絡人加入通訊錄（離線可用）</div>
+      </div>
+
+      <!-- Bio & Tags -->
+      <div class="bio-box" id="bioContainer">
+        <div id="dispBio"></div>
+        <div class="tags-row" id="dispTags"></div>
+      </div>
+
+      <!-- Contact Details -->
+      <div class="contact-list" id="contactListContainer"></div>
+    </div>
+
+    <!-- Edit Mode Panel -->
+    <div class="edit-panel">
+      <div class="form-section-title">基本資料與頭像</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>大頭照（選填，將自動壓縮並嵌入 .vcf 聯絡人頭像）</label>
+          <div class="avatar-upload-row">
+            <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" style="font-size:0.8rem;" />
+            <button type="button" class="ctrl-btn" onclick="removeAvatar()">移除照片</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>中文姓名</label>
+          <input type="text" id="inNameZh" oninput="onFieldInput('nameZh', this.value)" placeholder="例：黃敬棋" />
+        </div>
+        <div class="form-group">
+          <label>英文姓名 (First Last)</label>
+          <input type="text" id="inNameEn" oninput="onFieldInput('nameEn', this.value)" placeholder="例：Jing-Qi Huang" />
+        </div>
+        <div class="form-group">
+          <label>中文職稱</label>
+          <input type="text" id="inTitleZh" oninput="onFieldInput('titleZh', this.value)" placeholder="例：實習醫學生" />
+        </div>
+        <div class="form-group">
+          <label>英文職稱</label>
+          <input type="text" id="inTitleEn" oninput="onFieldInput('titleEn', this.value)" placeholder="例：Medical Intern" />
+        </div>
+        <div class="form-group">
+          <label>單位 / 學校 / 醫院 (中文)</label>
+          <input type="text" id="inOrgZh" oninput="onFieldInput('orgZh', this.value)" placeholder="例：醫學系 / 臨床醫學部" />
+        </div>
+        <div class="form-group">
+          <label>單位 / 學校 / 醫院 (英文)</label>
+          <input type="text" id="inOrgEn" oninput="onFieldInput('orgEn', this.value)" placeholder="例：School of Medicine" />
+        </div>
+      </div>
+
+      <div class="form-section-title">聯絡方式（留白欄位不會顯示於名片上）</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>行動電話 (Mobile)</label>
+          <input type="tel" id="inPhone" oninput="onFieldInput('phone', this.value)" placeholder="例：+886-912-345-678" />
+        </div>
+        <div class="form-group">
+          <label>電子信箱 (Email)</label>
+          <input type="email" id="inEmail" oninput="onFieldInput('email', this.value)" placeholder="例：name@example.com" />
+        </div>
+        <div class="form-group">
+          <label>LINE ID 或加入好友連結</label>
+          <input type="text" id="inLine" oninput="onFieldInput('line', this.value)" placeholder="例：your_line_id 或 https://line.me/ti/p/..." />
+        </div>
+        <div class="form-group">
+          <label>所在城市 / 地址</label>
+          <input type="text" id="inAddress" oninput="onFieldInput('address', this.value)" placeholder="例：新北市 / 台北市, Taiwan" />
+        </div>
+        <div class="form-group">
+          <label>LinkedIn 網址</label>
+          <input type="url" id="inLinkedin" oninput="onFieldInput('linkedin', this.value)" placeholder="https://linkedin.com/in/..." />
+        </div>
+        <div class="form-group">
+          <label>個人網站 / Instagram / 其他連結</label>
+          <input type="url" id="inWebsite" oninput="onFieldInput('website', this.value)" placeholder="https://..." />
+        </div>
+      </div>
+
+      <div class="form-section-title">簡介、專長標籤與 vCard 備註</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>個人簡介 (Bio)</label>
+          <textarea id="inBio" rows="2" oninput="onFieldInput('bio', this.value)" placeholder="簡短自我介紹或臨床興趣"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>專長 / 語言標籤（以逗號分隔）</label>
+          <input type="text" id="inTags" oninput="onFieldInput('tags', this.value)" placeholder="例：繁體中文, English, 基礎日語" />
+        </div>
+        <div class="form-group full">
+          <label>線上名片網址（選填，用於「名片網址條碼」分頁）</label>
+          <input type="url" id="inCardUrl" oninput="onFieldInput('cardUrl', this.value)" placeholder="https://your-site.com/card.html" />
+        </div>
+        <div class="form-group full">
+          <label>聯絡人備註（將寫入 .vcf 檔案的備註欄）</label>
+          <input type="text" id="inNote" oninput="onFieldInput('note', this.value)" placeholder="例：於研討會認識 / 實習醫學生" />
+        </div>
+      </div>
+
+      <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+        <button type="button" class="ctrl-btn" onclick="resetCardDefault()">↺ 還原預設</button>
+        <button type="button" class="btn-save-vcf" style="padding: 10px 20px;" onclick="toggleEditMode()">✓ 完成並預覽名片</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="footer-note">
+    點擊「儲存聯絡人 (.vcf)」可直接匯入 iPhone、Android、Google 聯絡人與 Outlook。資料僅儲存於您的瀏覽器本機空間。
+  </div>
+
+  <div class="toast" id="toastMsg"></div>
+
+  <script>
+    // =========================================================================
+    // Compact, Zero-Dependency QR Code Generator (Byte Mode UTF-8, Versions 1-20)
+    // =========================================================================
+    const MiniQR = (function() {
+      const EXP = new Array(256);
+      const LOG = new Array(256);
+      for (let i = 0; i < 8; i++) EXP[i] = 1 << i;
+      for (let i = 8; i < 256; i++) {
+        EXP[i] = EXP[i - 4] ^ EXP[i - 5] ^ EXP[i - 6] ^ EXP[i - 8];
+      }
+      for (let i = 0; i < 255; i++) LOG[EXP[i]] = i;
+
+      function gmul(a, b) {
+        if (a === 0 || b === 0) return 0;
+        return EXP[(LOG[a] + LOG[b]) % 255];
+      }
+
+      function rsGenPoly(ecLen) {
+        let poly = [1];
+        for (let i = 0; i < ecLen; i++) {
+          const next = new Array(poly.length + 1).fill(0);
+          const factor = EXP[i];
+          for (let j = 0; j < poly.length; j++) {
+            next[j] ^= poly[j];
+            next[j + 1] ^= gmul(poly[j], factor);
+          }
+          poly = next;
+        }
+        return poly;
+      }
+
+      function rsEncode(data, ecLen) {
+        const gen = rsGenPoly(ecLen);
+        const res = data.concat(new Array(ecLen).fill(0));
+        for (let i = 0; i < data.length; i++) {
+          const coef = res[i];
+          if (coef !== 0) {
+            for (let j = 0; j < gen.length; j++) {
+              res[i + j] ^= gmul(gen[j], coef);
+            }
+          }
+        }
+        return res.slice(data.length);
+      }
+
+      // Version table for ECC Level L: [version, totalDataCodewords, ecPerBlock, numBlocksGroup1, dataPerBlockG1, numBlocksG2, dataPerBlockG2]
+      const VERSIONS_L = [
+        null,
+        [1,   19,  7, 1, 19, 0,  0],
+        [2,   34, 10, 1, 34, 0,  0],
+        [3,   55, 15, 1, 55, 0,  0],
+        [4,   80, 20, 1, 80, 0,  0],
+        [5,  108, 26, 1,108, 0,  0],
+        [6,  136, 18, 2, 68, 0,  0],
+        [7,  156, 20, 2, 78, 0,  0],
+        [8,  194, 24, 2, 97, 0,  0],
+        [9,  232, 30, 2,116, 0,  0],
+        [10, 274, 18, 2, 68, 2, 69],
+        [11, 324, 20, 4, 81, 0,  0],
+        [12, 370, 24, 2, 92, 2, 93],
+        [13, 428, 26, 4,107, 0,  0],
+        [14, 461, 30, 3,115, 1,116],
+        [15, 523, 22, 5, 87, 1, 88],
+        [16, 589, 24, 5, 98, 1, 99],
+        [17, 647, 28, 1,107, 5,108],
+        [18, 721, 30, 5,120, 1,121],
+        [19, 795, 28, 3,113, 4,114],
+        [20, 861, 28, 3,107, 5,108]
+      ];
+
+      const ALIGNMENT_POS = [
+        [],
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90]
+      ];
+
+      function toUTF8Bytes(str) {
+        return Array.from(new TextEncoder().encode(str));
+      }
+
+      function generate(text) {
+        const bytes = toUTF8Bytes(text);
+        let ver = 1;
+        for (; ver < VERSIONS_L.length; ver++) {
+          const cap = VERSIONS_L[ver][1];
+          const overhead = ver <= 9 ? 2 : 3;
+          if (bytes.length + overhead <= cap) break;
+        }
+        if (ver >= VERSIONS_L.length) return null;
+
+        const [, totalData, ecPerBlock, b1, d1, b2, d2] = VERSIONS_L[ver];
+        const bits = [];
+        function pushBits(val, len) {
+          for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1);
+        }
+
+        // Byte mode = 0100
+        pushBits(0b0100, 4);
+        pushBits(bytes.length, ver <= 9 ? 8 : 16);
+        for (const b of bytes) pushBits(b, 8);
+
+        const maxBits = totalData * 8;
+        const termLen = Math.min(4, maxBits - bits.length);
+        pushBits(0, termLen);
+        while (bits.length % 8 !== 0) bits.push(0);
+
+        const dataCW = [];
+        for (let i = 0; i < bits.length; i += 8) {
+          let byte = 0;
+          for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
+          dataCW.push(byte);
+        }
+        const padBytes = [0xec, 0x11];
+        let padIdx = 0;
+        while (dataCW.length < totalData) {
+          dataCW.push(padBytes[padIdx % 2]);
+          padIdx++;
+        }
+
+        // Split blocks & compute RS
+        const dataBlocks = [];
+        const ecBlocks = [];
+        let offset = 0;
+        for (let i = 0; i < b1; i++) {
+          const blk = dataCW.slice(offset, offset + d1);
+          offset += d1;
+          dataBlocks.push(blk);
+          ecBlocks.push(rsEncode(blk, ecPerBlock));
+        }
+        for (let i = 0; i < b2; i++) {
+          const blk = dataCW.slice(offset, offset + d2);
+          offset += d2;
+          dataBlocks.push(blk);
+          ecBlocks.push(rsEncode(blk, ecPerBlock));
+        }
+
+        const interleaved = [];
+        const maxD = Math.max(d1, d2);
+        for (let i = 0; i < maxD; i++) {
+          for (const blk of dataBlocks) {
+            if (i < blk.length) interleaved.push(blk[i]);
+          }
+        }
+        for (let i = 0; i < ecPerBlock; i++) {
+          for (const blk of ecBlocks) interleaved.push(blk[i]);
+        }
+
+        const size = ver * 4 + 17;
+        const grid = Array.from({ length: size }, () => new Array(size).fill(null));
+        const isFunc = Array.from({ length: size }, () => new Array(size).fill(false));
+
+        function setFunc(r, c, val) {
+          if (r >= 0 && r < size && c >= 0 && c < size) {
+            grid[r][c] = val ? 1 : 0;
+            isFunc[r][c] = true;
+          }
+        }
+
+        function drawFinder(row, col) {
+          for (let r = -1; r <= 7; r++) {
+            for (let c = -1; c <= 7; c++) {
+              const inOuter = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+              const inInner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
+              const onBorder = r === 0 || r === 6 || c === 0 || c === 6;
+              setFunc(row + r, col + c, inOuter && (onBorder || inInner));
+            }
+          }
+        }
+
+        drawFinder(0, 0);
+        drawFinder(0, size - 7);
+        drawFinder(size - 7, 0);
+
+        // Alignment patterns
+        const align = ALIGNMENT_POS[ver];
+        for (let i = 0; i < align.length; i++) {
+          for (let j = 0; j < align.length; j++) {
+            const r = align[i], c = align[j];
+            if (isFunc[r][c]) continue;
+            for (let dr = -2; dr <= 2; dr++) {
+              for (let dc = -2; dc <= 2; dc++) {
+                const dark = Math.abs(dr) === 2 || Math.abs(dc) === 2 || (dr === 0 && dc === 0);
+                setFunc(r + dr, c + dc, dark);
+              }
+            }
+          }
+        }
+
+        // Timing patterns
+        for (let i = 8; i < size - 8; i++) {
+          if (!isFunc[6][i]) setFunc(6, i, i % 2 === 0);
+          if (!isFunc[i][6]) setFunc(i, 6, i % 2 === 0);
+        }
+
+        // Dark module + reserve format/version info
+        setFunc(size - 8, 8, true);
+        for (let i = 0; i < 9; i++) {
+          if (!isFunc[8][i]) setFunc(8, i, false);
+          if (!isFunc[i][8]) setFunc(i, 8, false);
+        }
+        for (let i = 0; i < 8; i++) {
+          if (!isFunc[8][size - 1 - i]) setFunc(8, size - 1 - i, false);
+          if (!isFunc[size - 1 - i][8]) setFunc(size - 1 - i, 8, false);
+        }
+
+        if (ver >= 7) {
+          let rem = ver;
+          for (let i = 0; i < 12; i++) {
+            const bit = ((rem >>> i) & 1) === 1;
+            const a = Math.floor(i / 3);
+            const b = i % 3;
+            setFunc(a, size - 11 + b, bit);
+            setFunc(size - 11 + b, a, bit);
+          }
+          // Actual BCH(18,6) version bits
+          let vBits = ver << 12;
+          for (let i = 5; i >= 0; i--) {
+            if ((vBits >>> (i + 12)) & 1) vBits ^= (0x1f25 << i);
+          }
+          const fullVer = (ver << 12) | vBits;
+          for (let i = 0; i < 18; i++) {
+            const bit = ((fullVer >>> i) & 1) === 1;
+            const a = Math.floor(i / 3);
+            const b = i % 3;
+            setFunc(a, size - 11 + b, bit);
+            setFunc(size - 11 + b, a, bit);
+          }
+        }
+
+        // Place data bits with Mask 0: (r + c) % 2 === 0
+        const stream = [];
+        for (const cw of interleaved) {
+          for (let i = 7; i >= 0; i--) stream.push((cw >>> i) & 1);
+        }
+
+        let bitIdx = 0;
+        let upward = true;
+        for (let right = size - 1; right >= 1; right -= 2) {
+          if (right === 6) right = 5;
+          for (let step = 0; step < size; step++) {
+            const r = upward ? size - 1 - step : step;
+            for (let dx = 0; dx < 2; dx++) {
+              const c = right - dx;
+              if (!isFunc[r][c]) {
+                const rawBit = bitIdx < stream.length ? stream[bitIdx++] : 0;
+                const mask = (r + c) % 2 === 0 ? 1 : 0;
+                grid[r][c] = rawBit ^ mask;
+              }
+            }
+          }
+          upward = !upward;
+        }
+
+        // Format info for ECC L (01) + Mask 0 (000) -> 01000 -> BCH = 0x77c4
+        const fmt = 0x77c4;
+        for (let i = 0; i <= 5; i++) setFunc(8, i, ((fmt >>> i) & 1) === 1);
+        setFunc(8, 7, ((fmt >>> 6) & 1) === 1);
+        setFunc(8, 8, ((fmt >>> 7) & 1) === 1);
+        setFunc(7, 8, ((fmt >>> 8) & 1) === 1);
+        for (let i = 9; i < 15; i++) setFunc(14 - i, 8, ((fmt >>> i) & 1) === 1);
+
+        for (let i = 0; i < 8; i++) setFunc(size - 1 - i, 8, ((fmt >>> i) & 1) === 1);
+        for (let i = 8; i < 15; i++) setFunc(8, size - 15 + i, ((fmt >>> i) & 1) === 1);
+        setFunc(size - 8, 8, true);
+
+        return grid;
+      }
+
+      function renderToElement(container, text, targetPx = 190) {
+        const grid = generate(text);
+        if (!grid) {
+          container.innerHTML = '<div style="padding:16px;font-size:0.8rem;color:#64748b;">內容過長，請精簡簡介或使用網址條碼</div>';
+          return;
+        }
+        const n = grid.length;
+        const quiet = 3;
+        const total = n + quiet * 2;
+        const scale = Math.max(3, Math.floor(targetPx / total));
+        const canvas = document.createElement('canvas');
+        canvas.width = total * scale;
+        canvas.height = total * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f172a';
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (grid[r][c] === 1) {
+              ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
+            }
+          }
+        }
+        container.innerHTML = '';
+        container.appendChild(canvas);
+      }
+
+      return { renderToElement };
+    })();
+
+    // =========================================================================
+    // Digital Business Card State & Persistence
+    // =========================================================================
+    const CARD_STORAGE_KEY = 'digital_vcard_huang_jingqi_v1';
+
+    const DEFAULT_CARD = {
+      theme: 'navy',
+      lang: 'bilingual',
+      avatar: '',
+      nameZh: '黃敬棋',
+      nameEn: 'Jing-Qi Huang',
+      titleZh: '實習醫學生',
+      titleEn: 'Medical Intern',
+      orgZh: '',
+      orgEn: '',
+      phone: '',
+      email: '',
+      line: '',
+      address: 'Taiwan',
+      linkedin: '',
+      website: '',
+      bio: '對臨床醫學與跨文化醫療溝通充滿熱忱，歡迎隨時與我聯繫。',
+      tags: '繁體中文, English, 基礎日語',
+      cardUrl: '',
+      note: '實習醫學生 | Medical Intern'
+    };
+
+    let cardData = loadCardData();
+    let isEditing = false;
+    let qrOpen = false;
+    let qrMode = 'vcf';
+
+    function loadCardData() {
+      try {
+        const saved = localStorage.getItem(CARD_STORAGE_KEY);
+        if (saved) {
+          return { ...DEFAULT_CARD, ...JSON.parse(saved) };
+        }
+      } catch (e) {
+        console.warn('LocalStorage unavailable:', e);
+      }
+      return { ...DEFAULT_CARD };
+    }
+
+    function saveCardData() {
+      try {
+        localStorage.setItem(CARD_STORAGE_KEY, JSON.stringify(cardData));
+      } catch (e) {
+        console.warn('Save failed:', e);
+      }
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toastMsg');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    // =========================================================================
+    // Standards-Compliant vCard 3.0 Generator (.vcf)
+    // =========================================================================
+    function escapeVCardVal(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r?\n/g, '\\n');
+    }
+
+    function buildVCardString(includePhoto = true) {
+      const zh = (cardData.nameZh || '').trim();
+      const en = (cardData.nameEn || '').trim();
+
+      // Determine Formatted Name (FN) and Structured Name (N:Last;First;;;)
+      let fn = '';
+      let lastName = '';
+      let firstName = '';
+
+      if (zh && en) {
+        fn = `${zh} (${en})`;
+      } else {
+        fn = zh || en || 'Contact';
+      }
+
+      if (en) {
+        const parts = en.split(/\s+/);
+        if (parts.length >= 2) {
+          lastName = parts[parts.length - 1];
+          firstName = parts.slice(0, -1).join(' ');
+        } else {
+          firstName = en;
+        }
+      } else if (zh) {
+        if (zh.length >= 2) {
+          lastName = zh.charAt(0);
+          firstName = zh.slice(1);
+        } else {
+          firstName = zh;
+        }
+      }
+
+      const titleParts = [cardData.titleZh, cardData.titleEn].filter(Boolean).map(s => s.trim());
+      const orgParts = [cardData.orgZh, cardData.orgEn].filter(Boolean).map(s => s.trim());
+
+      const lines = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `N;CHARSET=UTF-8:${escapeVCardVal(lastName)};${escapeVCardVal(firstName)};;;`,
+        `FN;CHARSET=UTF-8:${escapeVCardVal(fn)}`
+      ];
+
+      if (orgParts.length > 0) {
+        lines.push(`ORG;CHARSET=UTF-8:${escapeVCardVal(orgParts.join(' / '))}`);
+      }
+      if (titleParts.length > 0) {
+        lines.push(`TITLE;CHARSET=UTF-8:${escapeVCardVal(titleParts.join(' / '))}`);
+      }
+      if (cardData.phone && cardData.phone.trim()) {
+        lines.push(`TEL;TYPE=CELL,VOICE:${escapeVCardVal(cardData.phone.trim())}`);
+      }
+      if (cardData.email && cardData.email.trim()) {
+        lines.push(`EMAIL;TYPE=PREF,INTERNET:${escapeVCardVal(cardData.email.trim())}`);
+      }
+      if (cardData.address && cardData.address.trim()) {
+        lines.push(`ADR;TYPE=WORK;CHARSET=UTF-8:;;${escapeVCardVal(cardData.address.trim())};;;;`);
+      }
+      if (cardData.website && cardData.website.trim()) {
+        lines.push(`URL:${escapeVCardVal(cardData.website.trim())}`);
+      }
+      if (cardData.linkedin && cardData.linkedin.trim()) {
+        lines.push(`URL;TYPE=LinkedIn:${escapeVCardVal(cardData.linkedin.trim())}`);
+      }
+      if (cardData.line && cardData.line.trim()) {
+        const lineVal = cardData.line.trim();
+        if (/^https?:\/\//i.test(lineVal)) {
+          lines.push(`URL;TYPE=LINE:${escapeVCardVal(lineVal)}`);
+        } else {
+          lines.push(`X-SOCIALPROFILE;TYPE=LINE:${escapeVCardVal(lineVal)}`);
+        }
+      }
+
+      // Combine note + tags + line ID if not URL
+      const noteItems = [];
+      if (cardData.note && cardData.note.trim()) noteItems.push(cardData.note.trim());
+      if (cardData.line && cardData.line.trim() && !/^https?:\/\//i.test(cardData.line.trim())) {
+        noteItems.push(`LINE ID: ${cardData.line.trim()}`);
+      }
+      if (cardData.tags && cardData.tags.trim()) {
+        noteItems.push(`Languages / Skills: ${cardData.tags.trim()}`);
+      }
+      if (noteItems.length > 0) {
+        lines.push(`NOTE;CHARSET=UTF-8:${escapeVCardVal(noteItems.join(' | '))}`);
+      }
+
+      // Optional embedded JPEG avatar photo for native iOS/Android contact card
+      if (includePhoto && cardData.avatar && cardData.avatar.startsWith('data:image/jpeg;base64,')) {
+        const b64 = cardData.avatar.split(',')[1];
+        if (b64) {
+          lines.push(`PHOTO;ENCODING=b;TYPE=JPEG:${b64}`);
+        }
+      }
+
+      lines.push('END:VCARD');
+      return lines.join('\r\n');
+    }
+
+    function downloadVCF() {
+      const vcf = buildVCardString(true);
+      const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const fileBase = (cardData.nameEn || cardData.nameZh || 'contact').trim().replace(/[^a-zA-Z0-9\u4e00-\u9fff_-]+/g, '_');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileBase}.vcf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('已匯出 .vcf 聯絡人檔案！');
+    }
+
+    // =========================================================================
+    // UI Rendering & Interactions
+    // =========================================================================
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function setInputSafe(id, val) {
+      const el = document.getElementById(id);
+      if (el && document.activeElement !== el) {
+        el.value = val || '';
+      }
+    }
+
+    function renderCard() {
+      document.body.setAttribute('data-theme', cardData.theme || 'navy');
+      document.getElementById('themeSelect').value = cardData.theme || 'navy';
+      document.getElementById('langSelect').value = cardData.lang || 'bilingual';
+
+      const lang = cardData.lang || 'bilingual';
+
+      // UI Labels by language
+      const uiMap = {
+        bilingual: {
+          edit: '編輯名片', done: '完成預覽',
+          saveVcf: '儲存聯絡人 (.vcf)', qrBtn: 'QR Code', copyBtn: '複製',
+          qrVcfTab: '存聯絡人條碼 (vCard)', qrUrlTab: '名片網址條碼 (URL)',
+          qrVcfHint: '使用手機相機掃描，即可直接將聯絡人加入通訊錄（離線可用）',
+          qrUrlHint: '掃描開啟線上電子名片網址（請先於編輯模式設定網址）'
+        },
+        zh: {
+          edit: '編輯名片', done: '完成預覽',
+          saveVcf: '儲存聯絡人 (.vcf)', qrBtn: '行動條碼', copyBtn: '複製資訊',
+          qrVcfTab: '存聯絡人條碼 (vCard)', qrUrlTab: '名片網址條碼',
+          qrVcfHint: '使用手機相機掃描，即可直接將聯絡人加入通訊錄（離線可用）',
+          qrUrlHint: '掃描開啟線上電子名片網址（請先於編輯模式設定網址）'
+        },
+        en: {
+          edit: 'Edit Card', done: 'Preview',
+          saveVcf: 'Save Contact (.vcf)', qrBtn: 'QR Code', copyBtn: 'Copy',
+          qrVcfTab: 'vCard QR (Offline)', qrUrlTab: 'Website URL QR',
+          qrVcfHint: 'Scan with phone camera to add directly to Contacts (works offline)',
+          qrUrlHint: 'Scan to open hosted digital business card URL'
+        }
+      };
+      const u = uiMap[lang] || uiMap.bilingual;
+
+      document.getElementById('editBtnLabel').textContent = isEditing ? u.done : u.edit;
+      document.getElementById('lblSaveVcf').textContent = u.saveVcf;
+      document.getElementById('lblQrBtn').textContent = u.qrBtn;
+      document.getElementById('lblCopyBtn').textContent = u.copyBtn;
+      document.getElementById('tabQrVcf').textContent = u.qrVcfTab;
+      document.getElementById('tabQrUrl').textContent = u.qrUrlTab;
+
+      // Avatar
+      const avatarBox = document.getElementById('avatarContainer');
+      if (cardData.avatar) {
+        avatarBox.innerHTML = `<img src="${cardData.avatar}" alt="Avatar" />`;
+      } else {
+        const initial = (cardData.nameZh || cardData.nameEn || '名').trim().charAt(0).toUpperCase();
+        avatarBox.textContent = initial;
+      }
+
+      // Name, Title, Organization
+      const zhNameEl = document.getElementById('dispNameZh');
+      const enNameEl = document.getElementById('dispNameEn');
+      const titleEl = document.getElementById('dispTitle');
+      const orgEl = document.getElementById('dispOrg');
+
+      if (lang === 'zh') {
+        zhNameEl.textContent = cardData.nameZh || cardData.nameEn || '-';
+        zhNameEl.style.display = 'block';
+        enNameEl.style.display = 'none';
+        titleEl.textContent = cardData.titleZh || cardData.titleEn || '';
+        orgEl.textContent = cardData.orgZh || cardData.orgEn || '';
+      } else if (lang === 'en') {
+        zhNameEl.textContent = cardData.nameEn || cardData.nameZh || '-';
+        zhNameEl.style.display = 'block';
+        enNameEl.style.display = 'none';
+        titleEl.textContent = cardData.titleEn || cardData.titleZh || '';
+        orgEl.textContent = cardData.orgEn || cardData.orgZh || '';
+      } else {
+        zhNameEl.textContent = cardData.nameZh || cardData.nameEn || '-';
+        zhNameEl.style.display = 'block';
+        if (cardData.nameZh && cardData.nameEn) {
+          enNameEl.textContent = cardData.nameEn;
+          enNameEl.style.display = 'block';
+        } else {
+          enNameEl.style.display = 'none';
+        }
+        const titles = [cardData.titleZh, cardData.titleEn].filter(Boolean);
+        titleEl.textContent = titles.join(' · ');
+        const orgs = [cardData.orgZh, cardData.orgEn].filter(Boolean);
+        orgEl.textContent = orgs.join(' · ');
+      }
+
+      titleEl.style.display = titleEl.textContent ? 'inline-block' : 'none';
+      orgEl.style.display = orgEl.textContent ? 'block' : 'none';
+
+      // Bio & Tags
+      const bioContainer = document.getElementById('bioContainer');
+      const dispBio = document.getElementById('dispBio');
+      const dispTags = document.getElementById('dispTags');
+      const tagsArr = (cardData.tags || '').split(/[,，、]/).map(t => t.trim()).filter(Boolean);
+
+      if ((cardData.bio && cardData.bio.trim()) || tagsArr.length > 0) {
+        bioContainer.style.display = 'block';
+        dispBio.textContent = cardData.bio || '';
+        dispBio.style.display = cardData.bio && cardData.bio.trim() ? 'block' : 'none';
+        dispTags.innerHTML = tagsArr.map(tag => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('');
+        dispTags.style.marginTop = cardData.bio && cardData.bio.trim() ? '10px' : '0';
+      } else {
+        bioContainer.style.display = 'none';
+      }
+
+      // Contact Items
+      const items = [];
+      if (cardData.phone && cardData.phone.trim()) {
+        const cleanTel = cardData.phone.trim().replace(/[^+\d]/g, '');
+        items.push({
+          icon: '📞',
+          label: lang === 'en' ? 'Mobile' : '行動電話 / Mobile',
+          val: cardData.phone.trim(),
+          href: `tel:${cleanTel}`
+        });
+      }
+      if (cardData.email && cardData.email.trim()) {
+        items.push({
+          icon: '✉️',
+          label: lang === 'en' ? 'Email' : '電子信箱 / Email',
+          val: cardData.email.trim(),
+          href: `mailto:${cardData.email.trim()}`
+        });
+      }
+      if (cardData.line && cardData.line.trim()) {
+        const l = cardData.line.trim();
+        const isUrl = /^https?:\/\//i.test(l);
+        items.push({
+          icon: '💬',
+          label: 'LINE',
+          val: l,
+          href: isUrl ? l : null,
+          external: isUrl
+        });
+      }
+      if (cardData.linkedin && cardData.linkedin.trim()) {
+        items.push({
+          icon: '💼',
+          label: 'LinkedIn',
+          val: cardData.linkedin.trim().replace(/^https?:\/\/(www\.)?/i, ''),
+          href: cardData.linkedin.trim(),
+          external: true
+        });
+      }
+      if (cardData.website && cardData.website.trim()) {
+        items.push({
+          icon: '🌐',
+          label: lang === 'en' ? 'Website' : '個人網站 / Website',
+          val: cardData.website.trim().replace(/^https?:\/\//i, ''),
+          href: cardData.website.trim(),
+          external: true
+        });
+      }
+      if (cardData.address && cardData.address.trim()) {
+        items.push({
+          icon: '📍',
+          label: lang === 'en' ? 'Location' : '所在城市 / Location',
+          val: cardData.address.trim(),
+          href: null
+        });
+      }
+
+      const listEl = document.getElementById('contactListContainer');
+      if (items.length === 0) {
+        listEl.innerHTML = `<div class="empty-contact-tip">尚未填寫電話或社群資訊，請點擊上方「編輯名片」新增聯絡方式</div>`;
+      } else {
+        listEl.innerHTML = items.map(it => {
+          const inner = `
+            <div class="c-left">
+              <div class="c-icon">${it.icon}</div>
+              <div class="c-meta">
+                <div class="c-label">${escapeHtml(it.label)}</div>
+                <div class="c-val">${escapeHtml(it.val)}</div>
+              </div>
+            </div>
+            ${it.href ? '<div class="c-arrow">↗</div>' : ''}
+          `;
+          if (it.href) {
+            const target = it.external ? ' target="_blank" rel="noopener noreferrer"' : '';
+            return `<a class="contact-item" href="${escapeHtml(it.href)}"${target}>${inner}</a>`;
+          }
+          return `<div class="contact-item">${inner}</div>`;
+        }).join('');
+      }
+
+      // Sync Edit Form Inputs safely
+      setInputSafe('inNameZh', cardData.nameZh);
+      setInputSafe('inNameEn', cardData.nameEn);
+      setInputSafe('inTitleZh', cardData.titleZh);
+      setInputSafe('inTitleEn', cardData.titleEn);
+      setInputSafe('inOrgZh', cardData.orgZh);
+      setInputSafe('inOrgEn', cardData.orgEn);
+      setInputSafe('inPhone', cardData.phone);
+      setInputSafe('inEmail', cardData.email);
+      setInputSafe('inLine', cardData.line);
+      setInputSafe('inAddress', cardData.address);
+      setInputSafe('inLinkedin', cardData.linkedin);
+      setInputSafe('inWebsite', cardData.website);
+      setInputSafe('inBio', cardData.bio);
+      setInputSafe('inTags', cardData.tags);
+      setInputSafe('inCardUrl', cardData.cardUrl);
+      setInputSafe('inNote', cardData.note);
+
+      if (qrOpen) renderQR();
+    }
+
+    function renderQR() {
+      const wrap = document.getElementById('qrCanvasWrap');
+      const hint = document.getElementById('qrHintText');
+      const lang = cardData.lang || 'bilingual';
+
+      document.getElementById('tabQrVcf').classList.toggle('active', qrMode === 'vcf');
+      document.getElementById('tabQrUrl').classList.toggle('active', qrMode === 'url');
+
+      if (qrMode === 'vcf') {
+        const vcfCompact = buildVCardString(false);
+        MiniQR.renderToElement(wrap, vcfCompact, 195);
+        hint.textContent = lang === 'en'
+          ? 'Scan with phone camera to add directly to Contacts (works offline)'
+          : '使用手機相機掃描，即可直接將聯絡人加入通訊錄（離線可用）';
+      } else {
+        const url = (cardData.cardUrl || cardData.website || '').trim();
+        if (!url) {
+          wrap.innerHTML = '<div style="padding:22px 14px;font-size:0.82rem;color:#64748b;max-width:210px;">請先點擊「編輯名片」填入線上名片網址或個人網站</div>';
+        } else {
+          MiniQR.renderToElement(wrap, url, 195);
+        }
+        hint.textContent = lang === 'en'
+          ? 'Scan to open hosted digital business card URL'
+          : '掃描開啟線上電子名片網址';
+      }
+    }
+
+    function toggleQRPanel() {
+      qrOpen = !qrOpen;
+      document.getElementById('qrPanel').classList.toggle('open', qrOpen);
+      if (qrOpen) renderQR();
+    }
+
+    function setQrMode(mode) {
+      qrMode = mode;
+      renderQR();
+    }
+
+    function onFieldInput(key, value) {
+      cardData[key] = value;
+      saveCardData();
+      renderCard();
+    }
+
+    function toggleEditMode() {
+      if (isEditing && document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+      isEditing = !isEditing;
+      document.body.classList.toggle('is-editing', isEditing);
+      document.getElementById('btnEditToggle').classList.toggle('active', isEditing);
+      renderCard();
+    }
+
+    function changeLang(lang) {
+      cardData.lang = lang;
+      saveCardData();
+      renderCard();
+    }
+
+    function changeTheme(theme) {
+      cardData.theme = theme;
+      saveCardData();
+      renderCard();
+    }
+
+    function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // Resize to 180x180 JPEG so localStorage & VCF stay fast and compact
+          const size = 180;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          cardData.avatar = canvas.toDataURL('image/jpeg', 0.82);
+          saveCardData();
+          renderCard();
+          showToast('頭像已更新並將自動嵌入 .vcf');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function removeAvatar() {
+      cardData.avatar = '';
+      saveCardData();
+      renderCard();
+      showToast('已移除頭像');
+    }
+
+    function copyCardText() {
+      const lines = [];
+      const nameStr = [cardData.nameZh, cardData.nameEn].filter(Boolean).join(' ');
+      if (nameStr) lines.push(nameStr);
+      const titleStr = [cardData.titleZh, cardData.titleEn].filter(Boolean).join(' / ');
+      if (titleStr) lines.push(titleStr);
+      const orgStr = [cardData.orgZh, cardData.orgEn].filter(Boolean).join(' / ');
+      if (orgStr) lines.push(orgStr);
+      if (cardData.phone) lines.push(`Tel: ${cardData.phone}`);
+      if (cardData.email) lines.push(`Email: ${cardData.email}`);
+      if (cardData.line) lines.push(`LINE: ${cardData.line}`);
+      if (cardData.linkedin) lines.push(`LinkedIn: ${cardData.linkedin}`);
+      if (cardData.website) lines.push(`Web: ${cardData.website}`);
+
+      const text = lines.join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('已複製名片資訊到剪貼簿！');
+        }).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('已複製名片資訊到剪貼簿！');
+    }
+
+    function exportBackupJSON() {
+      const blob = new Blob([JSON.stringify(cardData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `BusinessCard_${cardData.nameEn || cardData.nameZh || 'Backup'}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('已匯出名片設定備份');
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          cardData = { ...DEFAULT_CARD, ...parsed };
+          saveCardData();
+          renderCard();
+          showToast('已還原名片設定！');
+        } catch (err) {
+          alert('JSON 檔案格式無效');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function resetCardDefault() {
+      if (confirm('確定要還原為初始預設名片嗎？')) {
+        cardData = { ...DEFAULT_CARD };
+        saveCardData();
+        renderCard();
+        showToast('已還原初始設定');
+      }
+    }
+
+    // Initial render
+    renderCard();
+  </script>
+</body>
+</html>
